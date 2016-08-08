@@ -17,6 +17,7 @@ db.query(`create table if not exists assignments (
 
   exports.getAll = function() {
     return new Promise((resolve, reject) => {
+
       let sql = squel.select()
                      .from('assignments')
                      .toString();
@@ -33,6 +34,7 @@ db.query(`create table if not exists assignments (
 
   exports.getOne = function(id){
     return new Promise((resolve, reject) => {
+
       let sql = squel.select()
                      .from('assignments')
                      .where('id = ?',id)
@@ -52,10 +54,34 @@ db.query(`create table if not exists assignments (
   exports.create = function(newAssignment){
   return new Promise((resolve, reject) => {
 
+    let percentage = score/total;
+    // A = percent >= 90
+    // B = percent < 90 && percent >= 80
+    // C = percent < 80 && percent >= 70
+    // D = percent < 70 && percent >= 60
+    // F = percent < 60
+
+    let grade = function(){
+      if(percentage >= .9){
+        return 'A';
+      } else if(percentage < .9 && percentage >= .8){
+        return 'B';
+      } else if(percentage < .8 && percentage >= .7){
+        return 'C';
+      } else if(percentage < .7 && percentage >= .6){
+        return 'D';
+      } else if(percentage < .6){
+        return 'F';
+      } else {
+        console.log('bad data');
+      }
+    }
+
     let sql = squel.insert()
                    .into('assignments')
                    .setFields(newAssignment)
                    .set('id', uuid())
+                   .set('grade', grade)
                    .toString();
 
     db.query(sql, err => {
@@ -85,3 +111,24 @@ exports.delete = function(id){
     });
   });
 }
+
+exports.update = function(id, updateObj) {
+  return new Promise((resolve, reject) => {
+    delete updateObj.id;
+    delete updateObj.createdAt;
+
+    let sql = squel.update()
+                   .table('images')
+                   .setFields(updateObj)
+                   .where('id = ?', id)
+                   .toString();
+
+    connection.query(sql, (err, okObject) => {
+      if(err) {
+        reject(err);
+      } else {
+        resolve();
+      }
+    });
+  });
+};

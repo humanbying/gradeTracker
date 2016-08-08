@@ -43,4 +43,17 @@ router.delete('/:id', (req, res) => {
     })
 })
 
+router.put('/:id', (req, res) => {
+  Assignment.update(req.params.id, req.body)
+    .then(() => {
+      return Assigment.getOne(req.params.id);
+    })
+    .then(assignment => {
+      res.send(assignment);
+    })
+    .catch(err => {
+      res.status(400).send(err);
+    });
+});
+
 module.exports = router;
